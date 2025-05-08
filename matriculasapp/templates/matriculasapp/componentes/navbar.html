@@ -1,0 +1,56 @@
+<!-- Barra de navegação superior -->
+<nav class="bg-indigo-600 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between h-16">
+            <div class="flex">
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-white text-lg font-bold">Sistema de Gestão Educacional</span>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <!-- Item de navegação atual -->
+                    <a href="{% url 'listar_matriculas' %}" class="{% if active_menu == 'matriculas' %}bg-indigo-700 text-white{% else %}text-gray-200 hover:bg-indigo-500 hover:text-white{% endif %} px-3 py-2 rounded-md text-sm font-medium flex items-center h-full">
+                        Matrículas
+                    </a>
+                    <!-- Outros itens do menu -->
+                    <a href="{% url 'listar_cursos' %}" class="{% if active_menu == 'cursos' %}bg-indigo-700 text-white{% else %}text-gray-200 hover:bg-indigo-500 hover:text-white{% endif %} px-3 py-2 rounded-md text-sm font-medium flex items-center h-full">
+                        Cursos
+                    </a>
+                    <a href="{% url 'listar_alunos' %}" class="{% if active_menu == 'alunos' %}bg-indigo-700 text-white{% else %}text-gray-200 hover:bg-indigo-500 hover:text-white{% endif %} px-3 py-2 rounded-md text-sm font-medium flex items-center h-full">
+                        Alunos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Menu mobile -->
+    <div class="sm:hidden" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="{% url 'listar_matriculas' %}" class="{% if active_menu == 'matriculas' %}bg-indigo-700 text-white{% else %}text-gray-200 hover:bg-indigo-500 hover:text-white{% endif %} block px-3 py-2 rounded-md text-base font-medium">
+                Matrículas
+            </a>
+            <a href="{% url 'listar_cursos' %}" class="{% if active_menu == 'cursos' %}bg-indigo-700 text-white{% else %}text-gray-200 hover:bg-indigo-500 hover:text-white{% endif %} block px-3 py-2 rounded-md text-base font-medium">
+                Cursos
+            </a>
+            <a href="{% url 'listar_alunos' %}" class="{% if active_menu == 'alunos' %}bg-indigo-700 text-white{% else %}text-gray-200 hover:bg-indigo-500 hover:text-white{% endif %} block px-3 py-2 rounded-md text-base font-medium">
+                Alunos
+            </a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Toggle para o menu mobile
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', function() {
+                const expanded = mobileMenu.classList.contains('hidden');
+                mobileMenu.classList.toggle('hidden');
+                mobileMenuButton.setAttribute('aria-expanded', expanded);
+            });
+        }
+    });
+</script>

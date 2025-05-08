@@ -1,20 +1,21 @@
-import os
 import csv
+import os
+
+import django
 import psycopg2
 from django.conf import settings
-import django
 
 # Configurar o ambiente Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'matriculados.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "matriculados.settings")
 django.setup()
 
 # Conectar ao banco de dados PostgreSQL
 conn = psycopg2.connect(
-    dbname=settings.DATABASES['default']['NAME'],
-    user=settings.DATABASES['default']['USER'],
-    password=settings.DATABASES['default']['PASSWORD'],
-    host=settings.DATABASES['default']['HOST'],
-    port=settings.DATABASES['default']['PORT']
+    dbname=settings.DATABASES["default"]["NAME"],
+    user=settings.DATABASES["default"]["USER"],
+    password=settings.DATABASES["default"]["PASSWORD"],
+    host=settings.DATABASES["default"]["HOST"],
+    port=settings.DATABASES["default"]["PORT"],
 )
 cursor = conn.cursor()
 
@@ -46,15 +47,15 @@ CREATE TABLE IF NOT EXISTS matriculas (
 conn.commit()
 
 # Importar dados do CSV
-csv_file = 'matriculas.csv'
+csv_file = "matriculas.csv"
 batch_size = 1000
 total_rows = 0
 
 print(f"Iniciando importação do arquivo {csv_file}...")
 
 try:
-    with open(csv_file, 'r', encoding='utf-8') as file:
-        reader = csv.reader(file, delimiter=';')
+    with open(csv_file, encoding="utf-8") as file:
+        reader = csv.reader(file, delimiter=";")
         next(reader)  # Pular cabeçalho
 
         batch = []
@@ -64,7 +65,9 @@ try:
                 print(f"Linha ignorada (dados insuficientes): {row}")
                 continue
 
-            # Converter valores de matrícula para inteiros, tratando valores vazios
+            # Percorre colunas de 10 a 18 (anos 2014 a 2022)
+            # e tenta converter para inteiro, se falhar, adiciona 0
+            # e imprime mensagem de erro
             matriculas = []
             for i in range(10, 19):
                 try:
@@ -78,24 +81,32 @@ try:
 
             # Preparar dados para inserção
             data = (
-                row[0] if len(row) > 0 else '',  # estado
-                row[1] if len(row) > 1 else '',  # cidade
-                row[2] if len(row) > 2 else '',  # ies
-                row[3] if len(row) > 3 else '',  # sigla
-                row[4] if len(row) > 4 else '',  # organizacao
-                row[5] if len(row) > 5 else '',  # categoria_administrativa
-                row[6] if len(row) > 6 else '',  # nome_curso
-                row[7] if len(row) > 7 else '',  # nome_detalhado_curso
-                row[8] if len(row) > 8 else '',  # modalidade
-                row[9] if len(row) > 9 else '',  # grau
-                *matriculas  # anos 2014-2022
+                row[0] if len(row) > 0 else "",  # estado
+                row[1] if len(row) > 1 else "",  # cidade
+                row[2] if len(row) > 2 else "",  # ies
+                row[3] if len(row) > 3 else "",  # sigla
+                row[4] if len(row) > 4 else "",  # organizacao
+                row[5] if len(row) > 5 else "",  # categoria_administrativa
+                row[6] if len(row) > 6 else "",  # nome_curso
+                row[7] if len(row) > 7 else "",  # nome_detalhado_curso
+                row[8] if len(row) > 8 else "",  # modalidade
+                row[9] if len(row) > 9 else "",  # grau
+                *matriculas,  # anos 2014-2022
             )
             batch.append(data)
-            
+
             # Inserir em lotes para melhor performance
             if len(batch) >= batch_size:
-                args_str = ','.join(cursor.mogrify("(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", x).decode('utf-8') for x in batch)
-                cursor.execute(f"INSERT INTO matriculas (estado, cidade, ies, sigla, organizacao, categoria_administrativa, nome_curso, nome_detalhado_curso, modalidade, grau, matriculas_2014, matriculas_2015, matriculas_2016, matriculas_2017, matriculas_2018, matriculas_2019, matriculas_2020, matriculas_2021, matriculas_2022) VALUES {args_str}")
+                args_str = ",".join(
+                    cursor.mogrify(
+                        "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                        x,
+                    ).decode("utf-8")
+                    for x in batch
+                )
+                cursor.execute(
+                    f"INSERT INTO matriculas (estado, cidade, ies, sigla, organizacao, categoria_administrativa, nome_curso, nome_detalhado_curso, modalidade, grau, matriculas_2014, matriculas_2015, matriculas_2016, matriculas_2017, matriculas_2018, matriculas_2019, matriculas_2020, matriculas_2021, matriculas_2022) VALUES {args_str}",
+                )
                 conn.commit()
                 total_rows += len(batch)
                 print(f"Importados {total_rows} registros...")
@@ -103,8 +114,16 @@ try:
 
         # Inserir o lote final se houver dados restantes
         if batch:
-            args_str = ','.join(cursor.mogrify("(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)", x).decode('utf-8') for x in batch)
-            cursor.execute(f"INSERT INTO matriculas (estado, cidade, ies, sigla, organizacao, categoria_administrativa, nome_curso, nome_detalhado_curso, modalidade, grau, matriculas_2014, matriculas_2015, matriculas_2016, matriculas_2017, matriculas_2018, matriculas_2019, matriculas_2020, matriculas_2021, matriculas_2022) VALUES {args_str}")
+            args_str = ",".join(
+                cursor.mogrify(
+                    "(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                    x,
+                ).decode("utf-8")
+                for x in batch
+            )
+            cursor.execute(
+                f"INSERT INTO matriculas (estado, cidade, ies, sigla, organizacao, categoria_administrativa, nome_curso, nome_detalhado_curso, modalidade, grau, matriculas_2014, matriculas_2015, matriculas_2016, matriculas_2017, matriculas_2018, matriculas_2019, matriculas_2020, matriculas_2021, matriculas_2022) VALUES {args_str}",
+            )
             conn.commit()
             total_rows += len(batch)
 
@@ -117,4 +136,4 @@ except Exception as e:
 finally:
     # Fechar conexões
     cursor.close()
-    conn.close() 
+    conn.close()

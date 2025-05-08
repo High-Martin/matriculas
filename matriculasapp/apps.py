@@ -2,5 +2,5 @@ from django.apps import AppConfig
 
 
 class MatriculasappConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'matriculasapp'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "matriculasapp"
