@@ -19,16 +19,16 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from matriculasapp.views import (
-    ListarAlunosView,
-    ListarCursosView,
+from matriculasapp.views.api import CountAlunosView
+from matriculasapp.views.core import (
+    DashBoardView,
     ListarMatriculasView,
 )
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", ListarMatriculasView.as_view(), name="listar_matriculas"),
+    path("", DashBoardView.as_view(), name="dashboard"),
     path("matriculas/", ListarMatriculasView.as_view(), name="listar_matriculas"),
-    path("cursos/", ListarCursosView.as_view(), name="listar_cursos"),
-    path("alunos/", ListarAlunosView.as_view(), name="listar_alunos"),
+    path("dashboard/", DashBoardView.as_view(), name="dashboard"),
+    path("dashboard/count_alunos/", CountAlunosView.as_view(), name="count_alunos"),
 ]
