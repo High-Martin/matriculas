@@ -24,7 +24,7 @@ class CountAlunosView(View):
 
         """
         # Obter parâmetros da URL
-        ano = request.GET.get("ano", "2022")
+        ano = request.GET.get("ano")
         modalidade = request.GET.get("modalidade")
         estado = request.GET.get("estado")
 

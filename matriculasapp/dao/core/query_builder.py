@@ -198,3 +198,35 @@ class QueryBuilder:
         self.offset_value = original_offset
 
         return result or 0
+
+    def sum(self, column: str) -> int:
+        """Executa uma consulta SUM com os mesmos filtros.
+
+        Args:
+            column: Nome da coluna a ser somada
+
+        Returns:
+            Soma dos valores da coluna especificada
+
+        """
+        # Salvar as colunas originais
+        original_columns = self.select_columns
+
+        # Modificar para somar
+        self.select_columns = [f"SUM({column})"]
+
+        # Remover limit e offset para contar todos os registros
+        original_limit = self.limit_value
+        original_offset = self.offset_value
+        self.limit_value = None
+        self.offset_value = None
+
+        # Executar a consulta
+        result = self.execute_scalar()
+
+        # Restaurar o estado original
+        self.select_columns = original_columns
+        self.limit_value = original_limit
+        self.offset_value = original_offset
+
+        return result or 0

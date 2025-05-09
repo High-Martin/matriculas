@@ -180,7 +180,7 @@ class MatriculaDao(Dao):
 
         return query_builder.count()
 
-    def get_quantidade_alunos(self, ano: str, filters: dict) -> int:
+    def get_quantidade_alunos(self, ano: str | None, filters: dict) -> int:
         """Conta o número de alunos matriculados.
 
         Args:
@@ -192,12 +192,13 @@ class MatriculaDao(Dao):
 
         """
         query_builder = QueryBuilder(self)
-        query_builder.select([f"matriculas_{ano}"])
 
         for key, value in filters.items():
-            if isinstance(value, str):
+            if isinstance(value, str) and not value.isdigit() and not value.isdecimal():
                 query_builder.where(key, "ILIKE", value)
             else:
                 query_builder.where(key, "=", value)
 
-        return query_builder.count()
+        if ano:
+            return query_builder.sum(f"matriculas_{ano}")
+        return query_builder.sum("matriculas_2022")
