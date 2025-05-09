@@ -77,11 +77,15 @@ class DashBoardView(View):
             Uma resposta HTTP com o template renderizado
 
         """
-        count_alunos: int = DaoFactory().get_dao("matricula").get_quantidade_alunos()
+        matricula_dao = DaoFactory().get_dao("matricula")
+        count_alunos: int = matricula_dao.get_quantidade_alunos()
         formated_count: str = f"{count_alunos:,}".replace(",", ".")
+
+        ranking_cursos = matricula_dao.get_ranking_cursos(2022, 10)
 
         context = {
             "active_menu": "dashboard",
+            "ranking_cursos": ranking_cursos,
             "count_alunos": formated_count,
             "ano_default": 2022,
             "anos": [

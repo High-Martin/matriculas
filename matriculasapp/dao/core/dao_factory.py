@@ -89,8 +89,8 @@ class DaoFactory:
         }
         dao = tables_map.get(table_name)
 
-        try:
-            return dao()
-        except TypeError as e:
+        if dao is None:
             msg = f"DAO para a tabela {table_name} não encontrado."
-            raise ValueError(msg) from e
+            raise ValueError(msg)
+
+        return dao()

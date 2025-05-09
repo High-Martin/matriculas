@@ -203,3 +203,50 @@ class MatriculaDao(Dao):
         if ano:
             return query_builder.sum(f"matriculas_{ano}")
         return query_builder.sum("matriculas_2022")
+
+    def get_ranking_cursos(
+        self, ano: int | None, count: int = 10, filters: dict | None = None
+    ) -> list[dict]:
+        """Retorna o ranking dos cursos com mais matrículas.
+
+        Args:
+            ano (int): Ano da matrícula
+            count (int): Número máximo de cursos a serem retornados. Defaults to 10.
+            filters (Dict, optional): Dicionário com os filtros a serem aplicados. Defaults to None.
+
+        Returns:
+            List[Dict]: Lista de dicionários com os dados dos cursos e suas respectivas contagens
+
+        """
+        query_builder = QueryBuilder(self)
+        filters = filters or {}
+        query_builder.select(
+            [
+                "nome_curso",
+                "nome_detalhado_curso",
+                "modalidade",
+                "grau",
+                "estado",
+                f"SUM(matriculas_{ano}) as matriculas",
+            ]
+        )
+
+        for key, value in filters.items():
+            if isinstance(value, str) and not value.isdigit() and not value.isdecimal():
+                query_builder.where(key, "ILIKE", value)
+            else:
+                query_builder.where(key, "=", value)
+
+        query_builder.limit(count)
+        query_builder.order_by("matriculas", "DESC")
+        query_builder.group_by(
+            [
+                "nome_curso",
+                "nome_detalhado_curso",
+                "modalidade",
+                "grau",
+                "estado",
+            ]
+        )
+
+        return query_builder.execute()
