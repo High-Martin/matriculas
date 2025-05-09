@@ -3,6 +3,9 @@ import psycopg2.extras  # Para permitir acesso a colunas por nome
 from django.conf import settings
 from psycopg2.extensions import connection
 
+from matriculasapp.dao.core.dao import Dao
+from matriculasapp.dao.filtro_alunos_dao import FiltroAlunosDao
+from matriculasapp.dao.filtro_cursos_dao import FiltroCursosDao
 from matriculasapp.dao.matricula_dao import MatriculaDao
 from matriculasapp.utils.exceptions import DatabaseConnectionError
 
@@ -74,7 +77,15 @@ class DaoFactory:
         """Obtém uma instância do DAO de matrícula."""
         return MatriculaDao(self._get_connection())
 
-    def get_dao(self, table_name: str) -> MatriculaDao:
+    def get_filtro_alunos_dao(self) -> FiltroAlunosDao:
+        """Obtém uma instância do DAO de filtro de alunos."""
+        return FiltroAlunosDao(self._get_connection())
+
+    def get_filtro_cursos_dao(self) -> FiltroCursosDao:
+        """Obtém uma instância do DAO de filtro de cursos."""
+        return FiltroCursosDao(self._get_connection())
+
+    def get_dao(self, table_name: str) -> Dao:
         """Obtém uma instância do DAO para a tabela especificada.
 
         Args:
@@ -86,6 +97,8 @@ class DaoFactory:
         """
         tables_map = {
             "matricula": self.get_matricula_dao,
+            "filtro_aluno": self.get_filtro_alunos_dao,
+            "filtro_cursos": self.get_filtro_cursos_dao,
         }
         dao = tables_map.get(table_name)
 

@@ -33,7 +33,7 @@ class Dao:
         Returns)_:
             cursor: Cursor para os resultados da consulta
         """
-        print(f"Executando consulta: {query} com parâmetros: {params}")
+        # print(f"Executando consulta: {query} com parâmetros: {params}")
         try:
             # Usar DictCursor para permitir acesso às colunas pelo nome
             cursor = self.connection.cursor(cursor_factory=psycopg2.extras.DictCursor)

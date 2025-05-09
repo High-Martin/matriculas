@@ -19,7 +19,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-from matriculasapp.views.api import CountAlunosView, RankingCursosView
+from matriculasapp.views.api import (
+    CountAlunosView,
+    ListFiltroAlunosView,
+    ListFiltroCursosView,
+    RankingCursosView,
+)
 from matriculasapp.views.core import (
     DashBoardView,
     ListarMatriculasView,
@@ -32,4 +37,6 @@ urlpatterns = [
     path("dashboard/", DashBoardView.as_view(), name="dashboard"),
     path("dashboard/count_alunos/", CountAlunosView.as_view(), name="count_alunos"),
     path("dashboard/ranking_cursos/", RankingCursosView.as_view(), name="ranking_cursos"),
+    path("dashboard/filtro_alunos/", ListFiltroAlunosView.as_view(), name="filtro_alunos"),
+    path("dashboard/filtro_cursos/", ListFiltroCursosView.as_view(), name="filtro_cursos"),
 ]
