@@ -1,8 +1,10 @@
+# filepath: /home/bgmartins/git/high-martin/matriculas/matriculasapp/dao/matricula_dao.py
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from matriculasapp.dao.dao import Dao
+from matriculasapp.dao.core.dao import Dao
+from matriculasapp.dao.core.query_builder import QueryBuilder
 from matriculasapp.models import MatriculaModel
 
 if TYPE_CHECKING:
@@ -29,42 +31,19 @@ class MatriculaDao(Dao):
         Returns_:
             MatriculaModel | None: Dicionário com os dados da matrícula ou None se não encontrada
         """
-        query = "SELECT * FROM matriculas WHERE id = %s"
-        cursor = self.execute_query(query, (matricula_id,))
-        result = cursor.fetchone()
-        cursor.close()
+        query_builder = QueryBuilder(self)
+        result = query_builder.where("id", "=", str(matricula_id)).execute()
 
-        if result:
-            return MatriculaModel.from_dict(dict(result))
+        if result and len(result) > 0:
+            return MatriculaModel.from_dict(result[0])
         return None
-
-    def get_all(self, page: int = 1, page_size: int = 10) -> list[MatriculaModel]:
-        """Retorna todas as matrículas com suporte a paginação.
-
-        Args:
-            page (int, optional): Número da página atual. Defaults to 1.
-            page_size (int, optional): Tamanho da página. Defaults to 10.
-
-        Returns:
-            List[MatriculaModel]: Lista de matrículas para a página solicitada
-
-        """
-        # Calcular offset com base na página
-        offset = (page - 1) * page_size
-
-        query = f"SELECT * FROM {self.table_name} LIMIT %s OFFSET %s"
-        cursor = self.execute_query(query, (page_size, offset))
-        results = cursor.fetchall()
-        cursor.close()
-
-        return [MatriculaModel.from_dict(dict(row)) for row in results]
 
     def update(self, object_id: int | str, matricula: MatriculaModel) -> bool:
         """Atualiza os dados de uma matrícula.
 
         Args:
             object_id (int | str): ID da matrícula
-            data (MatriculaModel): Objeto modelo com os dados a serem atualizados
+            matricula (MatriculaModel): Objeto modelo com os dados a serem atualizados
 
         Returns:
             bool: True se a atualização foi bem-sucedida, False caso contrário
@@ -135,6 +114,24 @@ class MatriculaDao(Dao):
             return MatriculaModel.from_dict(dict(result))
         return None
 
+    def get_all(self, page: int = 1, page_size: int = 10) -> list[MatriculaModel]:
+        """Retorna todas as matrículas com suporte a paginação.
+
+        Args:
+            page (int, optional): Número da página atual. Defaults to 1.
+            page_size (int, optional): Tamanho da página. Defaults to 10.
+
+        Returns:
+            List[MatriculaModel]: Lista de matrículas para a página solicitada
+
+        """
+        query_builder = QueryBuilder(self)
+
+        offset = (page - 1) * page_size
+        results = query_builder.limit(page_size).offset(offset).execute()
+
+        return [MatriculaModel.from_dict(row) for row in results]
+
     def filter(self, filters: dict, page: int = 1, page_size: int = 10) -> list[MatriculaModel]:
         """Busca matrículas com base em filtros específicos.
 
@@ -150,31 +147,17 @@ class MatriculaDao(Dao):
         if not filters:
             return self.get_all(page=page, page_size=page_size)
 
-        where_clauses = []
-        values = []
-
+        query_builder = QueryBuilder(self)
         for key, value in filters.items():
-            # Para valores textuais, usamos ILIKE para pesquisa case-insensitive
             if isinstance(value, str):
-                where_clauses.append(f"{key} ILIKE %s")
-                values.append(f"%{value}%")
+                query_builder.where(key, "ILIKE", value)
             else:
-                where_clauses.append(f"{key} = %s")
-                values.append(value)
+                query_builder.where(key, "=", value)
 
-        where_clause = " AND ".join(where_clauses)
-
-        # Calcular offset com base na página
         offset = (page - 1) * page_size
+        results = query_builder.limit(page_size).offset(offset).execute()
 
-        query = f"SELECT * FROM {self.table_name} WHERE {where_clause} LIMIT %s OFFSET %s"
-        values.extend([f"{page_size}", f"{offset}"])
-
-        cursor = self.execute_query(query, tuple(values))
-        results = cursor.fetchall()
-        cursor.close()
-
-        return [MatriculaModel.from_dict(dict(row)) for row in results]
+        return [MatriculaModel.from_dict(row) for row in results]
 
     def count_by_filter(self, filters: dict | None = None) -> int:
         """Conta o número de matrículas com base em filtros específicos.
@@ -186,26 +169,35 @@ class MatriculaDao(Dao):
             int: Número de matrículas encontradas
 
         """
-        if not filters:
-            query = f"SELECT COUNT(*) FROM {self.table_name}"
-            cursor = self.execute_query(query)
-        else:
-            where_clauses = []
-            values = []
+        query_builder = QueryBuilder(self)
 
+        if filters:
             for key, value in filters.items():
                 if isinstance(value, str):
-                    where_clauses.append(f"{key} ILIKE %s")
-                    values.append(f"%{value}%")
+                    query_builder.where(key, "ILIKE", value)
                 else:
-                    where_clauses.append(f"{key} = %s")
-                    values.append(value)
+                    query_builder.where(key, "=", value)
 
-            where_clause = " AND ".join(where_clauses)
-            query = f"SELECT COUNT(*) FROM {self.table_name} WHERE {where_clause}"
-            cursor = self.execute_query(query, tuple(values))
+        return query_builder.count()
 
-        result = cursor.fetchone()
-        cursor.close()
+    def get_quantidade_alunos(self, ano: str, filters: dict) -> int:
+        """Conta o número de alunos matriculados.
 
-        return result[0] if result else 0
+        Args:
+            ano (int): Ano da matrícula
+            filters (Dict, optional): Dicionário com os filtros a serem aplicados. Defaults to None.
+
+        Returns:
+            int: Número de alunos matriculados
+
+        """
+        query_builder = QueryBuilder(self)
+        query_builder.select([f"matriculas_{ano}"])
+
+        for key, value in filters.items():
+            if isinstance(value, str):
+                query_builder.where(key, "ILIKE", value)
+            else:
+                query_builder.where(key, "=", value)
+
+        return query_builder.count()

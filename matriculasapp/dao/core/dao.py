@@ -17,6 +17,8 @@ class Dao:
     Esta classe fornece uma interface para operações de banco de dados.
     """
 
+    table_name: str
+
     def __init__(self, connection: connection) -> None:
         """Inicializa o DAO com conexão com o banco de dados PostgreSQL já configurada."""
         self.connection = connection
@@ -31,6 +33,7 @@ class Dao:
         Returns)_:
             cursor: Cursor para os resultados da consulta
         """
+        print(f"Executando consulta: {query} com parâmetros: {params}")
         try:
             # Usar DictCursor para permitir acesso às colunas pelo nome
             cursor = self.connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
