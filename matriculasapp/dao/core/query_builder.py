@@ -170,6 +170,36 @@ class QueryBuilder:
 
         return result[0] if result else None
 
+    def _execute_aggregate(self, aggregate_columns: list[str]) -> int:
+        """Método auxiliar para executar funções de agregação.
+
+        Args:
+            aggregate_columns: Lista com as colunas da função de agregação
+
+        Returns:
+            Resultado da função de agregação ou 0 se não houver resultados
+
+        """
+        # Salvar estado original
+        original_columns = self.select_columns
+        original_limit = self.limit_value
+        original_offset = self.offset_value
+
+        # Configurar para agregação
+        self.select_columns = aggregate_columns
+        self.limit_value = None
+        self.offset_value = None
+
+        # Executar consulta
+        result = self.execute_scalar()
+
+        # Restaurar estado original
+        self.select_columns = original_columns
+        self.limit_value = original_limit
+        self.offset_value = original_offset
+
+        return result or 0
+
     def count(self) -> int:
         """Executa uma consulta COUNT com os mesmos filtros.
 
@@ -177,27 +207,7 @@ class QueryBuilder:
             Número de registros que correspondem aos filtros
 
         """
-        # Salvar as colunas originais
-        original_columns = self.select_columns
-
-        # Modificar para contar
-        self.select_columns = [f"COUNT({','.join(self.select_columns)})"]
-
-        # Remover limit e offset para contar todos os registros
-        original_limit = self.limit_value
-        original_offset = self.offset_value
-        self.limit_value = None
-        self.offset_value = None
-
-        # Executar a consulta
-        result = self.execute_scalar()
-
-        # Restaurar o estado original
-        self.select_columns = original_columns
-        self.limit_value = original_limit
-        self.offset_value = original_offset
-
-        return result or 0
+        return self._execute_aggregate([f"COUNT({','.join(self.select_columns)})"])
 
     def sum(self, column: str) -> int:
         """Executa uma consulta SUM com os mesmos filtros.
@@ -209,24 +219,4 @@ class QueryBuilder:
             Soma dos valores da coluna especificada
 
         """
-        # Salvar as colunas originais
-        original_columns = self.select_columns
-
-        # Modificar para somar
-        self.select_columns = [f"SUM({column})"]
-
-        # Remover limit e offset para contar todos os registros
-        original_limit = self.limit_value
-        original_offset = self.offset_value
-        self.limit_value = None
-        self.offset_value = None
-
-        # Executar a consulta
-        result = self.execute_scalar()
-
-        # Restaurar o estado original
-        self.select_columns = original_columns
-        self.limit_value = original_limit
-        self.offset_value = original_offset
-
-        return result or 0
+        return self._execute_aggregate([f"SUM({column})"])

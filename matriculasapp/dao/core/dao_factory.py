@@ -73,3 +73,24 @@ class DaoFactory:
     def get_matricula_dao(self) -> MatriculaDao:
         """Obtém uma instância do DAO de matrícula."""
         return MatriculaDao(self._get_connection())
+
+    def get_dao(self, table_name: str) -> MatriculaDao:
+        """Obtém uma instância do DAO para a tabela especificada.
+
+        Args:
+            table_name (str): Nome da tabela
+
+        Returns:
+            MatriculaDao: Instância do DAO para a tabela especificada
+
+        """
+        tables_map = {
+            "matricula": self.get_matricula_dao,
+        }
+        dao = tables_map.get(table_name)
+
+        try:
+            return dao()
+        except TypeError as e:
+            msg = f"DAO para a tabela {table_name} não encontrado."
+            raise ValueError(msg) from e

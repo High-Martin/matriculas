@@ -35,10 +35,16 @@
                         <!-- Filtro de Ano -->
                         <div class="w-full sm:w-48">
                             <label for="filtroAno" class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
-                            <select id="filtroAno" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                                <option value="">Todos</option>
+                            <select 
+                            id="filtroAno" 
+                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
                                 {% for ano in anos %}
-                                    <option value="{{ ano }}">{{ ano }}</option>
+                                    <option 
+                                        {% if ano == ano_default %}
+                                            selected
+                                        {% endif %}
+                                        value="{{ ano }}">{{ ano }}</option>
+                                    value="{{ ano }}">{{ ano }}</option>
                                 {% endfor %}
                             </select>
                         </div>

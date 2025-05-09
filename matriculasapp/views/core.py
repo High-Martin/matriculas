@@ -36,8 +36,7 @@ class ListarMatriculasView(View):
                 filters[param] = request.GET[param]
 
         # Buscar dados usando o DAO
-        dao_factory = DaoFactory()
-        matricula_dao = dao_factory.get_matricula_dao()
+        matricula_dao = DaoFactory().get_matricula_dao()
 
         # Obter matrículas com base nos filtros
         if filters:
@@ -78,12 +77,13 @@ class DashBoardView(View):
             Uma resposta HTTP com o template renderizado
 
         """
-        count: int = 1122
-        formated_count: str = f"{count:,}".replace(",", ".")
+        count_alunos: int = DaoFactory().get_dao("matricula").get_quantidade_alunos()
+        formated_count: str = f"{count_alunos:,}".replace(",", ".")
 
         context = {
             "active_menu": "dashboard",
             "count_alunos": formated_count,
+            "ano_default": 2022,
             "anos": [
                 2014,
                 2015,

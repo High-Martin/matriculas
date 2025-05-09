@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from matriculasapp.dao.core.dao import Dao
 from matriculasapp.dao.core.query_builder import QueryBuilder
-from matriculasapp.models import MatriculaModel
+from matriculasapp.models.matricula import Matricula
 
 if TYPE_CHECKING:
     from psycopg2.extensions import connection
@@ -22,7 +22,7 @@ class MatriculaDao(Dao):
         super().__init__(connection)
         self.table_name = "matriculas"
 
-    def find_by_id(self, matricula_id: int | str) -> MatriculaModel | None:
+    def find_by_id(self, matricula_id: int | str) -> Matricula | None:
         """Busca uma matrícula pelo ID.
 
         Args_:
@@ -35,10 +35,10 @@ class MatriculaDao(Dao):
         result = query_builder.where("id", "=", str(matricula_id)).execute()
 
         if result and len(result) > 0:
-            return MatriculaModel.from_dict(result[0])
+            return Matricula.from_dict(result[0])
         return None
 
-    def update(self, object_id: int | str, matricula: MatriculaModel) -> bool:
+    def update(self, object_id: int | str, matricula: Matricula) -> bool:
         """Atualiza os dados de uma matrícula.
 
         Args:
@@ -86,7 +86,7 @@ class MatriculaDao(Dao):
 
         return rows_affected > 0
 
-    def create(self, matricula: MatriculaModel) -> MatriculaModel | None:
+    def create(self, matricula: Matricula) -> Matricula | None:
         """Cria uma nova matrícula no banco de dados.
 
         Args:
@@ -111,10 +111,10 @@ class MatriculaDao(Dao):
         cursor.close()
 
         if result:
-            return MatriculaModel.from_dict(dict(result))
+            return Matricula.from_dict(dict(result))
         return None
 
-    def get_all(self, page: int = 1, page_size: int = 10) -> list[MatriculaModel]:
+    def get_all(self, page: int = 1, page_size: int = 10) -> list[Matricula]:
         """Retorna todas as matrículas com suporte a paginação.
 
         Args:
@@ -130,9 +130,9 @@ class MatriculaDao(Dao):
         offset = (page - 1) * page_size
         results = query_builder.limit(page_size).offset(offset).execute()
 
-        return [MatriculaModel.from_dict(row) for row in results]
+        return [Matricula.from_dict(row) for row in results]
 
-    def filter(self, filters: dict, page: int = 1, page_size: int = 10) -> list[MatriculaModel]:
+    def filter(self, filters: dict, page: int = 1, page_size: int = 10) -> list[Matricula]:
         """Busca matrículas com base em filtros específicos.
 
         Args:
@@ -157,7 +157,7 @@ class MatriculaDao(Dao):
         offset = (page - 1) * page_size
         results = query_builder.limit(page_size).offset(offset).execute()
 
-        return [MatriculaModel.from_dict(row) for row in results]
+        return [Matricula.from_dict(row) for row in results]
 
     def count_by_filter(self, filters: dict | None = None) -> int:
         """Conta o número de matrículas com base em filtros específicos.
@@ -180,7 +180,7 @@ class MatriculaDao(Dao):
 
         return query_builder.count()
 
-    def get_quantidade_alunos(self, ano: str | None, filters: dict) -> int:
+    def get_quantidade_alunos(self, ano: str | None = None, filters: dict | None = None) -> int:
         """Conta o número de alunos matriculados.
 
         Args:
@@ -192,6 +192,7 @@ class MatriculaDao(Dao):
 
         """
         query_builder = QueryBuilder(self)
+        filters = filters or {}
 
         for key, value in filters.items():
             if isinstance(value, str) and not value.isdigit() and not value.isdecimal():

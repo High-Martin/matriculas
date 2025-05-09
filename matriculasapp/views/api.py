@@ -36,8 +36,9 @@ class CountAlunosView(View):
         if estado:
             filters["estado"] = estado
 
-        matricula_dao = DaoFactory().get_matricula_dao()
+        matricula_dao = DaoFactory().get_dao("matricula")
         count_alunos = matricula_dao.get_quantidade_alunos(ano, filters)
+
         return JsonResponse(
             {
                 "status": "ok",
