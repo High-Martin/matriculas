@@ -32,9 +32,10 @@ from matriculasapp.views.core import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", DashBoardView.as_view(), name="dashboard"),
+    # path("", DashBoardView.as_view(), name="dashboard"),
     path("matriculas/", ListarMatriculasView.as_view(), name="listar_matriculas"),
     path("dashboard/", DashBoardView.as_view(), name="dashboard"),
+    # API URLs
     path("dashboard/count_alunos/", CountAlunosView.as_view(), name="count_alunos"),
     path("dashboard/ranking_cursos/", RankingCursosView.as_view(), name="ranking_cursos"),
     path("dashboard/filtro_alunos/", ListFiltroAlunosView.as_view(), name="filtro_alunos"),

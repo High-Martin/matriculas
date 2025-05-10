@@ -77,7 +77,7 @@ class DashBoardView(View):
             Uma resposta HTTP com o template renderizado
 
         """
-        matricula_dao = DaoFactory().get_dao("matricula")
+        matricula_dao = DaoFactory().get_matricula_dao()
         count_alunos: int = matricula_dao.get_quantidade_alunos()
         formated_count: str = f"{count_alunos:,}".replace(",", ".")
 

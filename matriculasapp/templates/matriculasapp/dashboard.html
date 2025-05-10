@@ -73,6 +73,8 @@
                             </svg>
                             Calcular
                         </button>
+                        {% comment %} Botão original removido {% endcomment %}
+                        {% include 'matriculasapp/componentes/botao_dropdown_filtros.html' %}
                     </div>
                            <!-- Contador de Alunos -->
                     <div class="flex justify-center bg-gray-50 rounded-lg py-2 px-8 border-gray-300 border w-full">
@@ -158,5 +160,6 @@
             {% endif %}
         </div>
     </div>
+    <script src="{% static 'js/botao_dropdown_filtros.js' %}"></script>
 </body>
 </html>
